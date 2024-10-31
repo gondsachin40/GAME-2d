@@ -150,7 +150,8 @@ class Obstacle {
 const goku = new Goku();
 const image = new Image();
 image.src = "temp.png";
-const jumpaudio = new Audio('punnet.mp3');
+const jumpaudio = new Audio('Punnet.mp3');
+const goku_screaming = new Audio('goku_screaming.mp3');
 const platforms = [new Platform({ x: 0, y: 600, w: 1240, h: 20 }), new Platform({ x: 1760, y: 750, w: 600, h: 50 }), new Platform({ x: 2350, y: 900, w: 1640, h: 50 }), new Platform({ x: 3230, y: 750, w: 380, h: 20 }), new Platform({ x: 4000, y: 960, w: 2200, h: 20 }), new Platform({ x: 4600, y: 800, w: 360, h: 20 }), new Platform({ x: 5630, y: 840, w: 240, h: 20 }), , new Platform({ x: 5280, y: 720, w: 230, h: 20 }), new Platform({ x: 4940, y: 560, w: 350, h: 20 }), new Platform({ x: 5400, y: 450, w: 340, h: 20 }), new Platform({ x: 5050, y: 200, w: 700, h: 20 }),
 new Platform({ x: 6550, y: 820, w: 460, h: 20 }), new Platform({ x: 7400, y: 620, w: 460, h: 20 }), new Platform({ x: 8325, y: 845, w: 460, h: 20 }),
 new Platform({ x: 9070, y: 550, w: 460, h: 20 }), new Platform({ x: 9980, y: 740, w: 240, h: 20 }), new Platform({ x: 10965, y: 1055, w: 235, h: 20 }),
@@ -187,22 +188,6 @@ function animate() {
     requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
     c.beginPath();
-    // platforms.forEach((platform) => {
-    //     platform.update();
-    // });
-    // obstacles.forEach((obstacle) => {
-    //     obstacle.update();
-    // });
-    // winners.forEach((win) => {
-    //     win.update();
-    // });
-    // message.update();
-    c.fillStyle = 'white';
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    obj.forEach((obj) => {
-        obj.draw();
-    });
-    goku.update();
     platforms.forEach((platform) => {
         platform.update();
     });
@@ -213,6 +198,22 @@ function animate() {
         win.update();
     });
     message.update();
+    c.fillStyle = 'white';
+    c.fillRect(0, 0, canvas.width, canvas.height);
+    obj.forEach((obj) => {
+        obj.draw();
+    });
+    goku.update();
+    // platforms.forEach((platform) => {
+    //     platform.update();
+    // });
+    // obstacles.forEach((obstacle) => {
+    //     obstacle.update();
+    // });
+    // winners.forEach((win) => {
+    //     win.update();
+    // });
+    // message.update();
     if (notover) {
         c.fillStyle = "brown";
         // c.fillRect(0, 0, 200, 100);
@@ -339,7 +340,7 @@ function animate() {
         goku.position.y + goku.height + goku.velocity.y >= message.position.y - 10 &&
         goku.position.x + goku.width >= message.position.x && goku.position.x <= message.position.x + message.width) {
         c.fillStyle = "#BEE4F4";
-        c.drawImage(nimbus, message.position.x, 0, 0, 100);
+        // c.drawImage(nimbus, message.position.x, 0, 0, 100);
         // c.fillStyle = "black";
         c.font = "30px Arial";
         c.fillText("Play special move by pressing ⬇️", message.position.x, 50);
@@ -366,6 +367,7 @@ document.addEventListener("keydown", (event) => {
             break;
         case 40: // down
             keys.down.pressed = true;
+            playAudio(goku_screaming);
             action = "headmove";
             break;
     }
@@ -376,7 +378,7 @@ function jump() {
         return;
     }
     goku.velocity.y = -22;
-    // playAudio(jumpaudio);
+    playAudio(jumpaudio);
     jumping = true;
 }
 window.addEventListener("keydown", function (event) {
@@ -400,6 +402,7 @@ document.addEventListener('keyup', (event) => {
             break;
         case 40:
             keys.down.pressed = false;
+            pauseAudio(goku_screaming);
             action = "standing";
             headmoveframe = 0;
             break;
