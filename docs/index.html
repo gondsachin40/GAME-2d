@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body style="background-color: black;">
+    <div id="devtools-warning">Please close the developer tools to continue.</div>
+    <h1 style="color:  white; text-align: center;">Dragon ball game</h1>
+    <canvas></canvas>
+    <script src="index.js"></script>
+
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        const devtoolsWarning = document.getElementById('devtools-warning');
+
+        const detectDevTools = () => {
+            console.log(window.outerWidth, window.innerWidth)
+            const devtoolsOpen = window.outerWidth - window.innerWidth > 100 || window.outerHeight - window.innerHeight > 100;
+            if (devtoolsOpen) {
+                // devtoolsWarning.style.display = 'block';
+                // alert('close ')
+            } else {
+                // devtoolsWarning.style.display = 'none';
+                // alert('dk')
+            }
+        };
+
+        setInterval(detectDevTools, 1000);
+    </script>
+</body>
+
+</html>
