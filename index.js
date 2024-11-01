@@ -1,6 +1,7 @@
 var canvas = document.querySelector("canvas");
 
 canvas.height = 1300;
+// canvas.height = document.body.clientHeight;
 canvas.width = document.body.clientWidth;
 
 var c = canvas.getContext("2d");
@@ -10,11 +11,67 @@ let scroll_speed = 10;
 let winn = false;
 var gokupos = new Image();
 gokupos.src = "gokupos.png";
-var nimbus = new Image();
-nimbus.src = "nimbus.png";
+// var nimbus = new Image();
+// nimbus.src = "nimbus.png";
+var saiba = new Image();
+saiba.src = "saiba.png";
 let action = "standing";
 let frame = 0;
+let enemyframe = 0;
 let headmoveframe = 0;
+
+function getRandomRGBColor() {
+  const r = Math.floor(Math.random() * 256); // Random red value
+  const g = Math.floor(Math.random() * 256); // Random green value
+  const b = Math.floor(Math.random() * 256); // Random blue value
+  return `rgb(${r}, ${g}, ${b})`;
+}
+class Enemy {
+  constructor(x, y, end) {
+    this.position = {
+      x: x,
+      y: y - 40,
+    };
+    this.velocity = {
+      x: 2,
+      y: 0,
+    };
+    this.pos = {
+      start: this.position.x,
+      end: end,
+    };
+    this.direction = true;
+    this.width = 200;
+    this.height = 150;
+    this.t = 0;
+  }
+  draw() {
+    c.fillStyle = "black";
+    if(this.direction)
+    c.drawImage(saiba ,this.t, 0 , 100 , 100 , this.position.x , this.position.y + 10, this.width, this.height);
+    else
+    c.drawImage(saiba ,this.t, 100 , 100 , 100 , this.position.x , this.position.y + 10, this.height, this.height);
+    // c.fillRect(this.position.x, this.position.y, 100, 100);
+    // c.fillStyle = getRandomRGBColor();
+    // c.fillRect(this.position.x + 10 , this.position.y + 10 , 20 , 20);
+    // c.fillRect(this.position.x + this.width - 30 , this.position.y +10 , 20 , 20);
+    if(frame % 5 === 0)
+    {
+      this.t += 100;
+    }
+    enemyframe++;
+    this.t %= 700;
+  }
+  update() {
+    this.draw();
+    if (this.position.x > this.pos.end || this.position.x < this.pos.start)
+    {
+      this.velocity.x = -this.velocity.x;
+      this.direction = !this.direction;
+    }
+    this.position.x += this.velocity.x;
+  }
+}
 class Goku {
   constructor() {
     this.position = {
@@ -195,6 +252,14 @@ class Obstacle {
   }
 }
 const goku = new Goku();
+const enemy = [
+  new Enemy(2400, 650, 3000),
+  new Enemy(3500, 650, 3900),
+  new Enemy(4600, 720, 5500),
+  new Enemy(5000, 80, 5500),
+  new Enemy(8325 , 600 , 8700),
+  new Enemy(6500 , 600 , 6900)
+];
 const image = new Image();
 image.src = "temp.png";
 const jumpaudio = new Audio("Punnet.mp3");
@@ -272,6 +337,9 @@ function animate() {
   obj.forEach((obj) => {
     obj.draw();
   });
+  enemy.forEach((enemy) => {
+    enemy.update();
+  });
   goku.update();
   // platforms.forEach((platform) => {
   //     platform.update();
@@ -324,6 +392,11 @@ function animate() {
       });
       message.position.x -= scroll_speed;
       obj[0].position.x -= scroll_speed;
+      enemy.forEach((enemy) => {
+        enemy.position.x -= scroll_speed;
+        enemy.pos.start -= scroll_speed;
+        enemy.pos.end -= scroll_speed;
+      });
       headmoveframe = 0;
     } else if (keys.left.pressed) {
       platforms.forEach((platform) => {
@@ -338,6 +411,11 @@ function animate() {
       message.position.x += scroll_speed;
       obj[0].position.x += scroll_speed;
       headmoveframe = 0;
+      enemy.forEach((enemy) => {
+        enemy.position.x += scroll_speed;
+        enemy.pos.start += scroll_speed;
+        enemy.pos.end += scroll_speed;
+      });
     } else if (
       keys.down.pressed &&
       headmoveframe > 7000 &&
@@ -349,6 +427,11 @@ function animate() {
       });
       obstacles.forEach((obstacle) => {
         obstacle.position.x -= scroll_speed + 10;
+      });
+      enemy.forEach((enemy) => {
+        enemy.position.x -= scroll_speed + 10;
+        enemy.pos.start -= scroll_speed + 10;
+        enemy.pos.end -= scroll_speed + 10;
       });
       winners.forEach((win) => {
         win.position.x -= scroll_speed + 10;
@@ -384,6 +467,24 @@ function animate() {
       goku.position.y < platform.position.y + platform.height
     ) {
       goku.velocity.x = 0;
+    }
+  });
+  enemy.forEach((enemy) => {
+    if (
+      goku.position.x <= enemy.position.x  + enemy.velocity.x &&
+      goku.position.x + goku.width + goku.velocity.x >= enemy.position.x  + enemy.velocity.x + 50 &&
+      goku.position.y + goku.height > enemy.position.y &&
+      goku.position.y < enemy.position.y + enemy.height 
+    ) {
+      notover = true;
+    }
+    if (
+      goku.position.x >= enemy.position.x  + enemy.velocity.x &&
+      goku.position.x + goku.velocity.x <= enemy.position.x  + enemy.velocity.x + 50 &&
+      goku.position.y + goku.height > enemy.position.y &&
+      goku.position.y < enemy.position.y + enemy.height 
+    ) {
+      notover = true;
     }
   });
   obstacles.forEach((obstacle) => {
@@ -422,12 +523,13 @@ function animate() {
   ) {
     c.fillStyle = "#BEE4F4";
     // c.drawImage(nimbus, message.position.x, 0, 0, 100);
-    // c.fillStyle = "black";
+    c.fillStyle = "black";
     c.font = "30px Arial";
     c.fillText("Play special move by pressing ⬇️", message.position.x, 50);
     // c.font = "80px Arial";
     // c.fillText("Click 'r' to play again", 1000, 800);
     goku.velocity.y = 0;
+    pauseAudio(goku_screaming);
   }
   c.stroke();
 }
