@@ -11,21 +11,25 @@ let scroll_speed = 10;
 let winn = false;
 var gokupos = new Image();
 gokupos.src = "gokupos.png";
-// var nimbus = new Image();
-// nimbus.src = "nimbus.png";
+var kamehameha = new Image();
+kamehameha.src = "kamehameha.png";
 var saiba = new Image();
 saiba.src = "saiba.png";
 let action = "standing";
 let frame = 0;
 let enemyframe = 0;
 let headmoveframe = 0;
-
+let is_kamehameha_available = false;
 function getRandomRGBColor() {
   const r = Math.floor(Math.random() * 256); // Random red value
   const g = Math.floor(Math.random() * 256); // Random green value
   const b = Math.floor(Math.random() * 256); // Random blue value
   return `rgb(${r}, ${g}, ${b})`;
 }
+var fire_x = 0;
+var fire_y = 0;
+var fire_w = 450;
+var fire_h = 100;
 class Enemy {
   constructor(x, y, end) {
     this.position = {
@@ -40,6 +44,7 @@ class Enemy {
       start: this.position.x,
       end: end,
     };
+    this.visible = true;
     this.direction = true;
     this.width = 200;
     this.height = 150;
@@ -63,6 +68,8 @@ class Enemy {
     this.t %= 700;
   }
   update() {
+    if(this.visible)
+    {
     this.draw();
     if (this.position.x > this.pos.end || this.position.x < this.pos.start)
     {
@@ -70,8 +77,12 @@ class Enemy {
       this.direction = !this.direction;
     }
     this.position.x += this.velocity.x;
+    }
   }
 }
+let time_of_kamehama = 0;
+let kamehameha_time = 0;
+let k_width = 150;
 class Goku {
   constructor() {
     this.position = {
@@ -85,6 +96,8 @@ class Goku {
     this.width = 150;
     this.height = 150;
     this.t = 0;
+    this.k = 0;
+    this.kame = 100;
   }
   draw() {
     // c.fillStyle = "red";
@@ -102,6 +115,34 @@ class Goku {
     );
     this.t += 100;
     this.t = this.t % 800;
+  }
+  kamehameha(){
+    fire_x = this.position.x + this.width;
+    fire_y = this.position.y + 40;   
+    c.drawImage( kamehameha,this.k,0,this.kame, 100,this.position.x,this.position.y,k_width,this.height);
+    kamehameha_time++;
+  if (frame % 20 == 0) {
+    if (this.k != 900)
+      { 
+      this.k += 100;
+      k_width = 150;
+      this.kame = 100; 
+      time_of_kamehama = 0; 
+    }
+    else
+    {
+      if(time_of_kamehama < 10)
+      {
+       k_width = 600;
+       this.kame = 300;
+       time_of_kamehama++;
+      }
+    }
+    headmoveframe += this.k;
+  }
+  this.k = this.k % 1200;
+  frame += 1;
+  frame %= 20;
   }
   standing() {
     c.drawImage(
@@ -173,12 +214,14 @@ class Goku {
     this.t = this.t % 1600;
     frame += 1;
     frame %= 20;
+
   }
   update() {
     if (action === "standing") this.standing();
     else if (action === "moveright") this.moveright();
     else if (action === "moveleft") this.moveleft();
     else if (action === "headmove") this.headmove();
+    else if (action === "kamehameha") this.kamehameha();
     this.position.y += this.velocity.y;
     this.position.x += this.velocity.x;
     if (this.position.y < 0) {
@@ -258,7 +301,8 @@ const enemy = [
   new Enemy(4600, 720, 5500),
   new Enemy(5000, 80, 5500),
   new Enemy(8325 , 600 , 8700),
-  new Enemy(6500 , 600 , 6900)
+  new Enemy(6500 , 600 , 6900),
+  new Enemy(14200 , 950 , 14700)
 ];
 const image = new Image();
 image.src = "temp.png";
@@ -338,8 +382,22 @@ function animate() {
     obj.draw();
   });
   enemy.forEach((enemy) => {
+    if(enemy.position.x  + 600 < goku.position.x )
+    {
+      enemy.visible = true;
+    }
     enemy.update();
   });
+  if(is_kamehameha_available)
+  {
+    // c.rect(fire_x , fire_y, fire_w, fire_h);
+    enemy.forEach((enemy) => {
+      if(enemy.position.x < fire_x + fire_w && fire_y  + fire_h >= enemy.position.y  && Math.abs(enemy.position.y - fire_y) < 150 && kamehameha_time > 200)
+      {
+        enemy.visible = false;
+      }
+    });
+  }
   goku.update();
   // platforms.forEach((platform) => {
   //     platform.update();
@@ -470,9 +528,11 @@ function animate() {
     }
   });
   enemy.forEach((enemy) => {
+    if(enemy.visible)
+    {
     if (
       goku.position.x <= enemy.position.x  + enemy.velocity.x &&
-      goku.position.x + goku.width + goku.velocity.x >= enemy.position.x  + enemy.velocity.x + 50 &&
+      goku.position.x + goku.width + goku.velocity.x >= enemy.position.x  + enemy.velocity.x + 100 &&
       goku.position.y + goku.height > enemy.position.y &&
       goku.position.y < enemy.position.y + enemy.height 
     ) {
@@ -486,6 +546,7 @@ function animate() {
     ) {
       notover = true;
     }
+  }
   });
   obstacles.forEach((obstacle) => {
     if (
@@ -537,6 +598,10 @@ animate();
 document.addEventListener("keydown", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
+    case 32: //space
+     action = "kamehameha";
+     is_kamehameha_available = true;
+     break;
     case 37:
       keys.left.pressed = true;
       action = "moveleft";
@@ -572,6 +637,14 @@ window.addEventListener("keydown", function (event) {
 document.addEventListener("keyup", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
+    case 32: //space
+     action = "standing";
+     is_kamehameha_available = false;
+     kamehameha_time = 0;
+     goku.kame = 100;
+     k_width = 150;
+     goku.k = 0;
+     break;
     case 37: //left
       keys.left.pressed = false;
       action = "standing";
