@@ -1,42 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
-        body {
-            margin: 0;
-        }
+      body {
+        margin: 0;
+      }
     </style>
-</head>
+  </head>
 
-<body style="background-color: black;">
-    <div id="devtools-warning">Please close the developer tools to continue.</div>
-    <h1 style="color:  white; text-align: center;">Dragon ball game</h1>
+  <body style="background-color: black">
+    <h1 style="color: white; text-align: center">Dragon ball game</h1>
     <canvas></canvas>
+    <script>
+      document.body.style.zoom = "50%";
+    </script>
     <script src="index.js"></script>
 
-    <script>
-        document.addEventListener('contextmenu', event => event.preventDefault());
+    <!-- <script>
+        // Create a new audio element
+        const audio = new Audio('mario.mp3'); // Replace 'horse.mp3' with the path to your audio file
 
-        const devtoolsWarning = document.getElementById('devtools-warning');
+        // Set the audio to loop
+        audio.loop = true;
 
-        const detectDevTools = () => {
-            console.log(window.outerWidth, window.innerWidth)
-            const devtoolsOpen = window.outerWidth - window.innerWidth > 100 || window.outerHeight - window.innerHeight > 100;
-            if (devtoolsOpen) {
-                // devtoolsWarning.style.display = 'block';
-                // alert('close ')
-            } else {
-                // devtoolsWarning.style.display = 'none';
-                // alert('dk')
-            }
-        };
+        // Load and play the audio
+        audio.load();
+        audio.play().catch(error => {
+            console.log("Autoplay might be blocked. Trigger play after user interaction:", error);
+        });
 
-        setInterval(detectDevTools, 1000);
-    </script>
-</body>
-
+        // Optional: You can add an event listener to ensure it plays after a user interaction if autoplay is blocked
+        document.addEventListener('click', () => {
+            audio.muted = true;
+        });
+        document.addEventListener('keydown', () => {
+            audio.muted = false;
+            audio.play();
+        })
+    </script> -->
+  </body>
 </html>
