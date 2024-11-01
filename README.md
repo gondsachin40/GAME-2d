@@ -1,2 +1,0 @@
-# GAME-2d
-COMPLETE 2d GAME
