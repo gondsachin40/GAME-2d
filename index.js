@@ -1,9 +1,11 @@
 var canvas = document.querySelector("canvas");
 
+// canvas.height = 1300;
 canvas.height = 1300;
 // canvas.height = document.body.clientHeight;
-canvas.width = document.body.clientWidth;
-
+// canvas.width = document.body.clientWidth;
+canvas.width = 2200;
+let show_hidden = false;
 var c = canvas.getContext("2d");
 const gravity = 0.5;
 let notover = false;
@@ -12,14 +14,26 @@ let winn = false;
 var gokupos = new Image();
 gokupos.src = "gokupos.png";
 var kamehameha = new Image();
-kamehameha.src = "kamehameha.png";
+kamehameha.src = "kama.png";
 var saiba = new Image();
 saiba.src = "saiba.png";
+var losing = new Image();
+losing.src = "losing.png";
+var winning = new Image();
+winning.src = "afterwinning.png";
+var healthbar = new Image();
+healthbar.src = "healthbar.png";
+let healthbar_pos_x = 607;
+let healthbar_width = 0;
+let healthbar_state = 1;
+let healthbar_time = 0;
 let action = "standing";
 let frame = 0;
+let kframe = 0;
 let enemyframe = 0;
 let headmoveframe = 0;
 let is_kamehameha_available = false;
+
 function getRandomRGBColor() {
   const r = Math.floor(Math.random() * 256); // Random red value
   const g = Math.floor(Math.random() * 256); // Random green value
@@ -56,10 +70,6 @@ class Enemy {
     c.drawImage(saiba ,this.t, 0 , 100 , 100 , this.position.x , this.position.y + 10, this.width, this.height);
     else
     c.drawImage(saiba ,this.t, 100 , 100 , 100 , this.position.x , this.position.y + 10, this.height, this.height);
-    // c.fillRect(this.position.x, this.position.y, 100, 100);
-    // c.fillStyle = getRandomRGBColor();
-    // c.fillRect(this.position.x + 10 , this.position.y + 10 , 20 , 20);
-    // c.fillRect(this.position.x + this.width - 30 , this.position.y +10 , 20 , 20);
     if(frame % 5 === 0)
     {
       this.t += 100;
@@ -100,8 +110,6 @@ class Goku {
     this.kame = 100;
   }
   draw() {
-    // c.fillStyle = "red";
-    // c.fillRect(this.position.x, this.position.y, this.width, this.height);
     c.drawImage(
       gokupos,
       0 + this.t,
@@ -119,9 +127,14 @@ class Goku {
   kamehameha(){
     fire_x = this.position.x + this.width;
     fire_y = this.position.y + 40;   
+    if(kamehameha_time < 150)
     c.drawImage( kamehameha,this.k,0,this.kame, 100,this.position.x,this.position.y,k_width,this.height);
+    else
+    {
+    goku.standing();  
+    }
     kamehameha_time++;
-  if (frame % 20 == 0) {
+    if (frame % 10 == 0) {
     if (this.k != 900)
       { 
       this.k += 100;
@@ -142,7 +155,7 @@ class Goku {
   }
   this.k = this.k % 1200;
   frame += 1;
-  frame %= 20;
+  frame %= 10;
   }
   standing() {
     c.drawImage(
@@ -296,7 +309,12 @@ class Obstacle {
 }
 const goku = new Goku();
 const enemy = [
-  new Enemy(2400, 650, 3000),
+  new Enemy(4900, 380, 5100),
+  new Enemy(3200, 510, 3500),
+  new Enemy(-500, 400, 1100),
+  new Enemy(4600, 560, 4850),
+  new Enemy(1700, 545, 2200),
+  new Enemy(2300, 650, 3000),
   new Enemy(3500, 650, 3900),
   new Enemy(4600, 720, 5500),
   new Enemy(5000, 80, 5500),
@@ -309,18 +327,19 @@ image.src = "temp.png";
 const jumpaudio = new Audio("Punnet.mp3");
 const goku_screaming = new Audio("goku_screaming.mp3");
 const platforms = [
+  new Platform({ x: 0, y: 0,   w: 100, h: 800 }),
   new Platform({ x: 0, y: 600, w: 1240, h: 20 }),
-  new Platform({ x: 1760, y: 750, w: 600, h: 50 }),
+  new Platform({ x: 1760, y: 770, w: 600, h: 50 }),
   new Platform({ x: 2350, y: 900, w: 1640, h: 50 }),
-  new Platform({ x: 3230, y: 750, w: 380, h: 20 }),
+  new Platform({ x: 3230, y: 720, w: 380, h: 20 }),
   new Platform({ x: 4000, y: 960, w: 2200, h: 20 }),
-  new Platform({ x: 4600, y: 800, w: 360, h: 20 }),
+  new Platform({ x: 4600, y: 795, w: 360, h: 20 }),
   new Platform({ x: 5630, y: 840, w: 240, h: 20 }),
   ,
   new Platform({ x: 5280, y: 720, w: 230, h: 20 }),
   new Platform({ x: 4940, y: 560, w: 350, h: 20 }),
   new Platform({ x: 5400, y: 450, w: 340, h: 20 }),
-  new Platform({ x: 5050, y: 200, w: 700, h: 20 }),
+  new Platform({ x: 5050, y: 200, w: 650, h: 20 }),
   new Platform({ x: 6550, y: 820, w: 460, h: 20 }),
   new Platform({ x: 7400, y: 620, w: 460, h: 20 }),
   new Platform({ x: 8325, y: 845, w: 460, h: 20 }),
@@ -333,11 +352,10 @@ const platforms = [
   new Platform({ x: 14270, y: 1220, w: 560, h: 200 }),
   new Platform({ x: 15200, y: 1000, w: 250, h: 20 }),
   new Platform({ x: 15880, y: 720, w: 300, h: 20 }),
-  // new Platform({ x: 16310, y: 1100, w: 640, h: 20 }
-  // new Platform({ x: 15060, y: 1020, w: 1025, h: 20 })
 ];
 const obj = [new Obj({ x: 0, y: 0, image })];
 const obstacles = [
+  new Obstacle({ x: -900, y: 900, w: 900, h: 20 }),
   new Obstacle({ x: 1240, y: 820, w: 520, h: 20 }),
   new Obstacle({ x: 6200, y: 1320, w: 8065, h: 20 }),
   new Obstacle({ x: 14830, y: 1340, w: 6600, h: 20 }),
@@ -392,43 +410,34 @@ function animate() {
   {
     // c.rect(fire_x , fire_y, fire_w, fire_h);
     enemy.forEach((enemy) => {
-      if(enemy.position.x < fire_x + fire_w && fire_y  + fire_h >= enemy.position.y  && Math.abs(enemy.position.y - fire_y) < 150 && kamehameha_time > 200)
+      if(enemy.position.x < fire_x + fire_w && fire_y  + fire_h >= enemy.position.y  && Math.abs(enemy.position.y - fire_y) < 150 && kamehameha_time > 100)
       {
         enemy.visible = false;
       }
     });
   }
   goku.update();
-  // platforms.forEach((platform) => {
-  //     platform.update();
-  // });
-  // obstacles.forEach((obstacle) => {
-  //     obstacle.update();
-  // });
-  // winners.forEach((win) => {
-  //     win.update();
-  // });
-  // message.update();
+  c.drawImage(healthbar , 100 , 0 , 600 , 100);
+  c.fillStyle = "#22aef1";
+  c.fillRect(healthbar_pos_x, 38 , healthbar_width ,27);
+  if(show_hidden)
+  {
+  platforms.forEach((platform) => {
+      platform.update();
+  });
+  obstacles.forEach((obstacle) => {
+      obstacle.update();
+  });
+  winners.forEach((win) => {
+      win.update();
+  });
+  message.update();
+}
   if (notover) {
-    c.fillStyle = "brown";
-    // c.fillRect(0, 0, 200, 100);
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    c.fillStyle = "black";
-    c.font = "250px Arial";
-    c.fillText("You Lose", 1000, 600);
-    c.fillStyle = "white";
-    c.font = "80px Arial";
-    c.fillText("Click 'r' to play again", 1000, 800);
+    c.drawImage(losing , 0, 0 , canvas.width,canvas.height);
   }
   if (winn) {
-    c.fillStyle = "red";
-    // c.fillRect(500, 300, 2000, 1000);
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    c.fillStyle = "black";
-    c.font = "150px Arial";
-    c.fillText("YOU, WON THE GAME!", 900, 600);
-    c.font = "80px Arial";
-    c.fillText("Click 'r' to play again", 1000, 800);
+    c.drawImage(winning , 0 , 0 , canvas.width , canvas.height);
   }
   if (keys.right.pressed && goku.position.x < 400) {
     goku.velocity.x = 5;
@@ -536,7 +545,27 @@ function animate() {
       goku.position.y + goku.height > enemy.position.y &&
       goku.position.y < enemy.position.y + enemy.height 
     ) {
-      notover = true;
+      if(healthbar_time === 0 || (healthbar_time > 10 && healthbar_time < 12)|| healthbar_time > 20)
+        {
+        if(healthbar_state === 1)
+        {
+        healthbar_pos_x = 490;
+        healthbar_width = 120;
+        healthbar_state++;
+        }
+        else if(healthbar_state === 2)
+        {
+          healthbar_pos_x = 300;
+          healthbar_width = 310;
+          healthbar_state++;
+        }
+        else if(healthbar_state === 3){
+          healthbar_pos_x = 220;
+          healthbar_width = 390;
+          notover = true;
+        }
+      }
+      healthbar_time++;
     }
     if (
       goku.position.x >= enemy.position.x  + enemy.velocity.x &&
@@ -544,10 +573,29 @@ function animate() {
       goku.position.y + goku.height > enemy.position.y &&
       goku.position.y < enemy.position.y + enemy.height 
     ) {
-      notover = true;
+      if(healthbar_time === 0 || (healthbar_time > 10 && healthbar_time < 12)|| healthbar_time > 20)
+        {
+        if(healthbar_state === 1)
+        {
+        healthbar_pos_x = 490;
+        healthbar_width = 120;
+        healthbar_state++;
+        }
+        else if(healthbar_state === 2)
+        {
+          healthbar_pos_x = 300;
+          healthbar_width = 310;
+          healthbar_state++;
+        }
+        else if(healthbar_state === 3){
+          healthbar_pos_x = 220;
+          healthbar_width = 390;
+          notover = true;
+        }
     }
   }
-  });
+  }
+});
   obstacles.forEach((obstacle) => {
     if (
       goku.position.y + goku.height <= obstacle.position.y &&
@@ -571,10 +619,6 @@ function animate() {
       winn = true;
     }
   });
-  // if (goku.position.y + goku.height <= winners[0].position.y &&
-  //     goku.position.y + goku.height + goku.velocity.y >= winners[0].position.y - 10 &&
-  //     goku.position.x + goku.width >= winners[0].position.x && goku.position.x <= winners[0].position.x + winners[0].width)
-  //     winn = true;
   if (
     goku.position.y + goku.height <= message.position.y &&
     goku.position.y + goku.height + goku.velocity.y >=
@@ -583,12 +627,9 @@ function animate() {
     goku.position.x <= message.position.x + message.width
   ) {
     c.fillStyle = "#BEE4F4";
-    // c.drawImage(nimbus, message.position.x, 0, 0, 100);
     c.fillStyle = "black";
     c.font = "30px Arial";
-    c.fillText("Play special move by pressing ⬇️", message.position.x, 50);
-    // c.font = "80px Arial";
-    // c.fillText("Click 'r' to play again", 1000, 800);
+    c.fillText("Play special move by holding ⬇️", message.position.x + 1000, 50);
     goku.velocity.y = 0;
     pauseAudio(goku_screaming);
   }
