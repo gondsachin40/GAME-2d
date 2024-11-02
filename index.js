@@ -1,15 +1,16 @@
 var canvas = document.querySelector("canvas");
-
+let enemy  = [];
+let platforms = [];
 // canvas.height = 1300;
 canvas.height = 1300;
 // canvas.height = document.body.clientHeight;
 // canvas.width = document.body.clientWidth;
 canvas.width = 2200;
-let show_hidden = false;
+let show_hidden = true;
 var c = canvas.getContext("2d");
 const gravity = 0.5;
 let notover = false;
-let scroll_speed = 10;
+let scroll_speed = 50;
 let winn = false;
 var gokupos = new Image();
 gokupos.src = "gokupos.png";
@@ -96,7 +97,7 @@ let k_width = 150;
 class Goku {
   constructor() {
     this.position = {
-      x: 250,
+      x: 150,
       y: 100,
     };
     this.velocity = {
@@ -267,14 +268,15 @@ class Platform {
   }
 }
 class Obj {
-  constructor({ x, y, image }) {
+  constructor({ x, y, image , width , height}) {
     this.position = {
       x: x,
       y: y,
     };
     this.image = image;
-    this.width = 22800;
-    this.height = canvas.height;
+    // this.width = 22800;
+    this.width = width;
+    this.height = height;
   }
   draw() {
     c.drawImage(
@@ -308,52 +310,13 @@ class Obstacle {
   }
 }
 const goku = new Goku();
-const enemy = [
-  new Enemy(4900, 380, 5100),
-  new Enemy(3200, 510, 3500),
-  new Enemy(-500, 400, 1100),
-  new Enemy(4600, 560, 4850),
-  new Enemy(1700, 545, 2200),
-  new Enemy(2300, 650, 3000),
-  new Enemy(3500, 650, 3900),
-  new Enemy(4600, 720, 5500),
-  new Enemy(5000, 80, 5500),
-  new Enemy(8325 , 600 , 8700),
-  new Enemy(6500 , 600 , 6900),
-  new Enemy(14200 , 950 , 14700)
-];
-const image = new Image();
-image.src = "temp.png";
+
+let image
+
 const jumpaudio = new Audio("Punnet.mp3");
 const goku_screaming = new Audio("goku_screaming.mp3");
-const platforms = [
-  new Platform({ x: 0, y: 0,   w: 100, h: 800 }),
-  new Platform({ x: 0, y: 600, w: 1240, h: 20 }),
-  new Platform({ x: 1760, y: 770, w: 600, h: 50 }),
-  new Platform({ x: 2350, y: 900, w: 1640, h: 50 }),
-  new Platform({ x: 3230, y: 720, w: 380, h: 20 }),
-  new Platform({ x: 4000, y: 960, w: 2200, h: 20 }),
-  new Platform({ x: 4600, y: 795, w: 360, h: 20 }),
-  new Platform({ x: 5630, y: 840, w: 240, h: 20 }),
-  ,
-  new Platform({ x: 5280, y: 720, w: 230, h: 20 }),
-  new Platform({ x: 4940, y: 560, w: 350, h: 20 }),
-  new Platform({ x: 5400, y: 450, w: 340, h: 20 }),
-  new Platform({ x: 5050, y: 200, w: 650, h: 20 }),
-  new Platform({ x: 6550, y: 820, w: 460, h: 20 }),
-  new Platform({ x: 7400, y: 620, w: 460, h: 20 }),
-  new Platform({ x: 8325, y: 845, w: 460, h: 20 }),
-  new Platform({ x: 9070, y: 550, w: 460, h: 20 }),
-  new Platform({ x: 9980, y: 740, w: 240, h: 20 }),
-  new Platform({ x: 10965, y: 1055, w: 235, h: 20 }),
-  new Platform({ x: 11820, y: 625, w: 235, h: 20 }),
-  new Platform({ x: 12790, y: 850, w: 240, h: 20 }),
-  new Platform({ x: 13770, y: 695, w: 240, h: 20 }),
-  new Platform({ x: 14270, y: 1220, w: 560, h: 200 }),
-  new Platform({ x: 15200, y: 1000, w: 250, h: 20 }),
-  new Platform({ x: 15880, y: 720, w: 300, h: 20 }),
-];
-const obj = [new Obj({ x: 0, y: 0, image })];
+
+let obj
 const obstacles = [
   new Obstacle({ x: -900, y: 900, w: 900, h: 20 }),
   new Obstacle({ x: 1240, y: 820, w: 520, h: 20 }),
@@ -408,7 +371,6 @@ function animate() {
   });
   if(is_kamehameha_available)
   {
-    // c.rect(fire_x , fire_y, fire_w, fire_h);
     enemy.forEach((enemy) => {
       if(enemy.position.x < fire_x + fire_w && fire_y  + fire_h >= enemy.position.y  && Math.abs(enemy.position.y - fire_y) < 150 && kamehameha_time > 100)
       {
@@ -635,7 +597,42 @@ function animate() {
   }
   c.stroke();
 }
-animate();
+
+async function load() {
+  
+  let stage = 'stage2';
+  const enemyURL = `${window.location.href}${stage}/enemy.json`;
+  const platformURL = `${window.location.href}${stage}/platform.json`;
+  console.log(``)
+
+  let image = new Image();
+image.src = `${stage}/temp.png`;
+   if(stage === 'stage1')
+   obj = [new Obj({ x: 0, y: 0, image  , width : 22800 , height : canvas.height})];
+   else if(stage === 'stage2')
+    obj = [new Obj({ x: 0, y: 0, image  , width : 22800 , height : 1500 })];
+    await fetch(enemyURL).then(val => {
+    return val.json()
+  }).then(val => {
+    enemy = [];
+    val.forEach(x => {
+      enemy.push(new Enemy(x.x, x.y, x.end));
+    })
+  })
+
+  await fetch(platformURL).then(val => {
+    return val.json()
+  }).then(val => {
+    platforms = [];
+    val.forEach(x => {
+      platforms.push(new Platform({ x: x.x, y: x.y,   w: x.w, h: x.h }));
+    })
+  })
+}
+
+load().then(() => {
+  animate();
+});
 document.addEventListener("keydown", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
