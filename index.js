@@ -3,14 +3,14 @@ let enemy = [];
 let platforms = [];
 let obstacles = [];
 let winners = [];
-let current_stage = 'stage1';
+let current_stage = 'stage2';
 let winncnt = 0;
 // canvas.height = 1300;
 canvas.height = 1300;
 // canvas.height = document.body.clientHeight;
 // canvas.width = document.body.clientWidth;
 canvas.width = 2200;
-let show_hidden = false;
+let show_hidden = true;
 var c = canvas.getContext("2d");
 const gravity = 0.5;
 let notover = false;
@@ -388,14 +388,12 @@ function animate() {
     c.drawImage(losing, 0, 0, canvas.width, canvas.height);
   }
   if (winn) {
-    current_stage = 'stage2';
-    winn = false;
-    winncnt++;
-    load()
-    // c.drawImage(winning, 0, 0, canvas.width, canvas.height);
-  }
-  if (winncnt === 2) {
+    // current_stage = 'stage2';
+    // winn = false;
+    // winncnt++;
+    // load()
     c.drawImage(winning, 0, 0, canvas.width, canvas.height);
+    winn = false;
   }
   if (keys.right.pressed && goku.position.x < 400) {
     goku.velocity.x = 5;
@@ -587,13 +585,11 @@ function animate() {
 }
 async function load() {
 
-  let stage = 'stage1';
+  let stage = 'stage2';
   const enemyURL = `${window.location.href}${stage}/enemy.json`;
   const platformURL = `${window.location.href}${stage}/platform.json`;
   const obstacleURL = `${window.location.href}${stage}/obstacle.json`;
   const winnerURL = `${window.location.href}${stage}/winner.json`;
-  console.log(``)
-
   let image = new Image();
   image.src = `${stage}/temp.png`;
   if (stage === 'stage1')
@@ -617,14 +613,14 @@ async function load() {
       platforms.push(new Platform({ x: x.x, y: x.y, w: x.w, h: x.h }));
     })
   })
-  // await fetch(winnerURL).then(val => {
-  //   return val.json()
-  // }).then(val => {
-  //   winners = [];
-  //   val.forEach(x => {
-  //     winners.push(new Platform({ x: x.x, y: x.y, w: x.w, h: x.h }));
-  //   })
-  // })
+  await fetch(winnerURL).then(val => {
+    return val.json()
+  }).then(val => {
+    winners = [];
+    val.forEach(x => {
+      winners.push(new Platform({ x: x.x, y: x.y, w: x.w, h: x.h }));
+    })
+  })
   await fetch(obstacleURL).then(val => {
     return val.json()
   }).then(val => {
