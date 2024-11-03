@@ -14,11 +14,7 @@ let show_hidden = false;
 var c = canvas.getContext("2d");
 const gravity = 0.5;
 let notover = false;
-<<<<<<< Updated upstream
 let scroll_speed = 15;
-=======
-let scroll_speed = 10;
->>>>>>> Stashed changes
 let winn = false;
 var gokupos = new Image();
 gokupos.src = "gokupos.png";
@@ -590,7 +586,7 @@ function animate() {
   c.stroke();
 }
 async function load() {
-  
+
   let stage = 'stage1';
   const enemyURL = `${window.location.href}${stage}/enemy.json`;
   const platformURL = `${window.location.href}${stage}/platform.json`;
@@ -621,14 +617,14 @@ async function load() {
       platforms.push(new Platform({ x: x.x, y: x.y, w: x.w, h: x.h }));
     })
   })
-  await fetch(winnerURL).then(val => {
-    return val.json()
-  }).then(val => {
-    winners = [];
-    val.forEach(x => {
-      winners.push(new Platform({ x: x.x, y: x.y, w: x.w, h: x.h }));
-    })
-  })
+  // await fetch(winnerURL).then(val => {
+  //   return val.json()
+  // }).then(val => {
+  //   winners = [];
+  //   val.forEach(x => {
+  //     winners.push(new Platform({ x: x.x, y: x.y, w: x.w, h: x.h }));
+  //   })
+  // })
   await fetch(obstacleURL).then(val => {
     return val.json()
   }).then(val => {
@@ -638,6 +634,7 @@ async function load() {
     })
   })
 }
+
 load().then(() => {
   animate();
 });
@@ -645,11 +642,11 @@ document.addEventListener("keydown", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
     case 32: //space
-     action = "kamehameha";
-     pauseAudio(goku_screaming);
-     playAudio(goku_kamehameha);
-     is_kamehameha_available = true;
-     break;
+      action = "kamehameha";
+      pauseAudio(goku_screaming);
+      playAudio(goku_kamehameha);
+      is_kamehameha_available = true;
+      break;
     case 37:
       keys.left.pressed = true;
       action = "moveleft";
@@ -687,15 +684,15 @@ document.addEventListener("keyup", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
     case 32: //space
-     action = "standing";
-     is_kamehameha_available = false;
-     pauseAudio(goku_kamehameha);
-    //  pauseAudio(goku_screaming);
-     kamehameha_time = 0;
-     goku.kame = 100;
-     k_width = 150;
-     goku.k = 0;
-     break;
+      action = "standing";
+      is_kamehameha_available = false;
+      pauseAudio(goku_kamehameha);
+      //  pauseAudio(goku_screaming);
+      kamehameha_time = 0;
+      goku.kame = 100;
+      k_width = 150;
+      goku.k = 0;
+      break;
     case 37: //left
       keys.left.pressed = false;
       action = "standing";

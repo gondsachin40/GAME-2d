@@ -1,34 +1,36 @@
 <!DOCTYPE html>
 <html lang="en" style="height: 100vh">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <style>
-      body {
-        /* margin: 4%; */
-        padding-left: 15%;
-      }
-    </style>
-  </head>
 
-  <body style="background-color: black; align-items: center;">
-    <h1 style="color: white; text-align: center; padding-right: 30%;">Dragon ball game</h1>
-    <canvas></canvas>
-    <script>
-      document.body.style.zoom = "50%";
-    </script>
-    <script src="index.js"></script>
-    <script>
-        const audio = new Audio('back.mp3');
-        audio.loop = true;
-        audio.load();
-        audio.play().catch(error => {
-            console.log("Autoplay might be blocked. Trigger play after user interaction:", error);
-        });
-        document.addEventListener('click', () => {
-            audio.muted = !audio.muted;
-        });
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <style>
+    body {
+      /* margin: 4%; */
+      padding-left: 15%;
+    }
+  </style>
+</head>
+
+<body style="background-color: black; align-items: center;">
+  <h1 style="color: white; text-align: center; padding-right: 30%;">Dragon ball game</h1>
+  <canvas></canvas>
+  <script>
+    document.body.style.zoom = "50%";
+  </script>
+  <script src="index.js"></script>
+  <script>
+    const audio = new Audio('back.mp3');
+    audio.loop = true;
+    audio.load();
+    audio.play().catch(error => {
+      console.log("Autoplay might be blocked. Trigger play after user interaction:", error);
+    });
+    document.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+    });
+  </script>
+</body>
+
 </html>
