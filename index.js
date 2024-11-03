@@ -3,14 +3,14 @@ let enemy = [];
 let platforms = [];
 let obstacles = [];
 let winners = [];
-let current_stage = 'stage2';
+let current_stage = 'stage1';
 let winncnt = 0;
 // canvas.height = 1300;
 canvas.height = 1300;
 // canvas.height = document.body.clientHeight;
 // canvas.width = document.body.clientWidth;
 canvas.width = 2200;
-let show_hidden = true;
+let show_hidden = false;
 var c = canvas.getContext("2d");
 const gravity = 0.5;
 let notover = false;
@@ -388,12 +388,13 @@ function animate() {
     c.drawImage(losing, 0, 0, canvas.width, canvas.height);
   }
   if (winn) {
-    // current_stage = 'stage2';
-    // winn = false;
-    // winncnt++;
-    // load()
-    c.drawImage(winning, 0, 0, canvas.width, canvas.height);
+    current_stage = 'stage2';
+    winncnt++;
+    load();
     winn = false;
+  }
+  if (winncnt === 2) {
+    c.drawImage(winning, 0, 0, canvas.width, canvas.height);
   }
   if (keys.right.pressed && goku.position.x < 400) {
     goku.velocity.x = 5;
@@ -585,7 +586,7 @@ function animate() {
 }
 async function load() {
 
-  let stage = 'stage2';
+  let stage = current_stage;
   const enemyURL = `${window.location.href}${stage}/enemy.json`;
   const platformURL = `${window.location.href}${stage}/platform.json`;
   const obstacleURL = `${window.location.href}${stage}/obstacle.json`;
