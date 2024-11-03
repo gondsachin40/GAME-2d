@@ -1,45 +1,36 @@
 <!DOCTYPE html>
 <html lang="en" style="height: 100vh">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <style>
-      body {
-        margin: 0;
-      }
-    </style>
-  </head>
 
-  <body style="background-color: black">
-    <h1 style="color: white; text-align: center">Dragon ball game</h1>
-    <canvas></canvas>
-    <script>
-      document.body.style.zoom = "50%";
-    </script>
-    <script src="index.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <style>
+    body {
+      /* margin: 4%; */
+      padding-left: 15%;
+    }
+  </style>
+</head>
 
-    <!-- <script>
-        // Create a new audio element
-        const audio = new Audio('mario.mp3'); // Replace 'horse.mp3' with the path to your audio file
+<body style="background-color: black; align-items: center;">
+  <h1 style="color: white; text-align: center; padding-right: 30%;">Dragon ball game</h1>
+  <canvas></canvas>
+  <script>
+    document.body.style.zoom = "50%";
+  </script>
+  <script src="index.js"></script>
+  <script>
+    const audio = new Audio('back.mp3');
+    audio.loop = true;
+    audio.load();
+    audio.play().catch(error => {
+      console.log("Autoplay might be blocked. Trigger play after user interaction:", error);
+    });
+    document.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+    });
+  </script>
+</body>
 
-        // Set the audio to loop
-        audio.loop = true;
-
-        // Load and play the audio
-        audio.load();
-        audio.play().catch(error => {
-            console.log("Autoplay might be blocked. Trigger play after user interaction:", error);
-        });
-
-        // Optional: You can add an event listener to ensure it plays after a user interaction if autoplay is blocked
-        document.addEventListener('click', () => {
-            audio.muted = true;
-        });
-        document.addEventListener('keydown', () => {
-            audio.muted = false;
-            audio.play();
-        })
-    </script> -->
-  </body>
 </html>

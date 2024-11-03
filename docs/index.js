@@ -1,25 +1,44 @@
 var canvas = document.querySelector("canvas");
-
+let enemy = [];
+let platforms = [];
+let obstacles = [];
+let winners = [];
+let current_stage = 'stage1';
+let winncnt = 0;
+// canvas.height = 1300;
 canvas.height = 1300;
 // canvas.height = document.body.clientHeight;
-canvas.width = document.body.clientWidth;
-
+// canvas.width = document.body.clientWidth;
+canvas.width = 2200;
+let show_hidden = false;
 var c = canvas.getContext("2d");
 const gravity = 0.5;
 let notover = false;
-let scroll_speed = 10;
+let scroll_speed = 12;
 let winn = false;
 var gokupos = new Image();
 gokupos.src = "gokupos.png";
 var kamehameha = new Image();
-kamehameha.src = "kamehameha.png";
+kamehameha.src = "kama.png";
 var saiba = new Image();
 saiba.src = "saiba.png";
+var losing = new Image();
+losing.src = "losing.png";
+var winning = new Image();
+winning.src = "afterwinning.png";
+var healthbar = new Image();
+healthbar.src = "healthbar.png";
+let healthbar_pos_x = 607;
+let healthbar_width = 0;
+let healthbar_state = 1;
+let healthbar_time = 0;
 let action = "standing";
 let frame = 0;
+let kframe = 0;
 let enemyframe = 0;
 let headmoveframe = 0;
 let is_kamehameha_available = false;
+
 function getRandomRGBColor() {
   const r = Math.floor(Math.random() * 256); // Random red value
   const g = Math.floor(Math.random() * 256); // Random green value
@@ -52,31 +71,24 @@ class Enemy {
   }
   draw() {
     c.fillStyle = "black";
-    if(this.direction)
-    c.drawImage(saiba ,this.t, 0 , 100 , 100 , this.position.x , this.position.y + 10, this.width, this.height);
+    if (this.direction)
+      c.drawImage(saiba, this.t, 0, 100, 100, this.position.x, this.position.y + 10, this.width, this.height);
     else
-    c.drawImage(saiba ,this.t, 100 , 100 , 100 , this.position.x , this.position.y + 10, this.height, this.height);
-    // c.fillRect(this.position.x, this.position.y, 100, 100);
-    // c.fillStyle = getRandomRGBColor();
-    // c.fillRect(this.position.x + 10 , this.position.y + 10 , 20 , 20);
-    // c.fillRect(this.position.x + this.width - 30 , this.position.y +10 , 20 , 20);
-    if(frame % 5 === 0)
-    {
+      c.drawImage(saiba, this.t, 100, 100, 100, this.position.x, this.position.y + 10, this.height, this.height);
+    if (frame % 5 === 0) {
       this.t += 100;
     }
     enemyframe++;
     this.t %= 700;
   }
   update() {
-    if(this.visible)
-    {
-    this.draw();
-    if (this.position.x > this.pos.end || this.position.x < this.pos.start)
-    {
-      this.velocity.x = -this.velocity.x;
-      this.direction = !this.direction;
-    }
-    this.position.x += this.velocity.x;
+    if (this.visible) {
+      this.draw();
+      if (this.position.x > this.pos.end || this.position.x < this.pos.start) {
+        this.velocity.x = -this.velocity.x;
+        this.direction = !this.direction;
+      }
+      this.position.x += this.velocity.x;
     }
   }
 }
@@ -86,7 +98,7 @@ let k_width = 150;
 class Goku {
   constructor() {
     this.position = {
-      x: 250,
+      x: 150,
       y: 100,
     };
     this.velocity = {
@@ -100,8 +112,6 @@ class Goku {
     this.kame = 100;
   }
   draw() {
-    // c.fillStyle = "red";
-    // c.fillRect(this.position.x, this.position.y, this.width, this.height);
     c.drawImage(
       gokupos,
       0 + this.t,
@@ -116,33 +126,34 @@ class Goku {
     this.t += 100;
     this.t = this.t % 800;
   }
-  kamehameha(){
+  kamehameha() {
     fire_x = this.position.x + this.width;
-    fire_y = this.position.y + 40;   
-    c.drawImage( kamehameha,this.k,0,this.kame, 100,this.position.x,this.position.y,k_width,this.height);
+    fire_y = this.position.y + 40;
+    if (kamehameha_time < 150)
+      c.drawImage(kamehameha, this.k, 0, this.kame, 100, this.position.x, this.position.y, k_width, this.height);
+    else {
+      goku.standing();
+    }
     kamehameha_time++;
-  if (frame % 20 == 0) {
-    if (this.k != 900)
-      { 
-      this.k += 100;
-      k_width = 150;
-      this.kame = 100; 
-      time_of_kamehama = 0; 
-    }
-    else
-    {
-      if(time_of_kamehama < 10)
-      {
-       k_width = 600;
-       this.kame = 300;
-       time_of_kamehama++;
+    if (frame % 10 == 0) {
+      if (this.k != 900) {
+        this.k += 100;
+        k_width = 150;
+        this.kame = 100;
+        time_of_kamehama = 0;
       }
+      else {
+        if (time_of_kamehama < 10) {
+          k_width = 600;
+          this.kame = 300;
+          time_of_kamehama++;
+        }
+      }
+      headmoveframe += this.k;
     }
-    headmoveframe += this.k;
-  }
-  this.k = this.k % 1200;
-  frame += 1;
-  frame %= 20;
+    this.k = this.k % 1200;
+    frame += 1;
+    frame %= 10;
   }
   standing() {
     c.drawImage(
@@ -254,14 +265,15 @@ class Platform {
   }
 }
 class Obj {
-  constructor({ x, y, image }) {
+  constructor({ x, y, image, width, height }) {
     this.position = {
       x: x,
       y: y,
     };
     this.image = image;
-    this.width = 22800;
-    this.height = canvas.height;
+    // this.width = 22800;
+    this.width = width;
+    this.height = height;
   }
   draw() {
     c.drawImage(
@@ -295,54 +307,15 @@ class Obstacle {
   }
 }
 const goku = new Goku();
-const enemy = [
-  new Enemy(2400, 650, 3000),
-  new Enemy(3500, 650, 3900),
-  new Enemy(4600, 720, 5500),
-  new Enemy(5000, 80, 5500),
-  new Enemy(8325 , 600 , 8700),
-  new Enemy(6500 , 600 , 6900),
-  new Enemy(14200 , 950 , 14700)
-];
-const image = new Image();
-image.src = "temp.png";
+
+let image
+
 const jumpaudio = new Audio("Punnet.mp3");
 const goku_screaming = new Audio("goku_screaming.mp3");
-const platforms = [
-  new Platform({ x: 0, y: 600, w: 1240, h: 20 }),
-  new Platform({ x: 1760, y: 750, w: 600, h: 50 }),
-  new Platform({ x: 2350, y: 900, w: 1640, h: 50 }),
-  new Platform({ x: 3230, y: 750, w: 380, h: 20 }),
-  new Platform({ x: 4000, y: 960, w: 2200, h: 20 }),
-  new Platform({ x: 4600, y: 800, w: 360, h: 20 }),
-  new Platform({ x: 5630, y: 840, w: 240, h: 20 }),
-  ,
-  new Platform({ x: 5280, y: 720, w: 230, h: 20 }),
-  new Platform({ x: 4940, y: 560, w: 350, h: 20 }),
-  new Platform({ x: 5400, y: 450, w: 340, h: 20 }),
-  new Platform({ x: 5050, y: 200, w: 700, h: 20 }),
-  new Platform({ x: 6550, y: 820, w: 460, h: 20 }),
-  new Platform({ x: 7400, y: 620, w: 460, h: 20 }),
-  new Platform({ x: 8325, y: 845, w: 460, h: 20 }),
-  new Platform({ x: 9070, y: 550, w: 460, h: 20 }),
-  new Platform({ x: 9980, y: 740, w: 240, h: 20 }),
-  new Platform({ x: 10965, y: 1055, w: 235, h: 20 }),
-  new Platform({ x: 11820, y: 625, w: 235, h: 20 }),
-  new Platform({ x: 12790, y: 850, w: 240, h: 20 }),
-  new Platform({ x: 13770, y: 695, w: 240, h: 20 }),
-  new Platform({ x: 14270, y: 1220, w: 560, h: 200 }),
-  new Platform({ x: 15200, y: 1000, w: 250, h: 20 }),
-  new Platform({ x: 15880, y: 720, w: 300, h: 20 }),
-  // new Platform({ x: 16310, y: 1100, w: 640, h: 20 }
-  // new Platform({ x: 15060, y: 1020, w: 1025, h: 20 })
-];
-const obj = [new Obj({ x: 0, y: 0, image })];
-const obstacles = [
-  new Obstacle({ x: 1240, y: 820, w: 520, h: 20 }),
-  new Obstacle({ x: 6200, y: 1320, w: 8065, h: 20 }),
-  new Obstacle({ x: 14830, y: 1340, w: 6600, h: 20 }),
-];
-const winners = [new Platform({ x: 18600, y: 1200, w: 900, h: 20 })];
+const goku_kamehameha = new Audio("kamehameha.mp3");
+// const back = new Audio("back.mp3");
+let obj
+
 const message = new Platform({ x: 16640, y: 450, w: 300, h: 20 });
 const keys = {
   right: {
@@ -364,6 +337,7 @@ function pauseAudio(x) {
 }
 function animate() {
   requestAnimationFrame(animate);
+  // playAudio(back);
   c.clearRect(0, 0, canvas.width, canvas.height);
   c.beginPath();
   platforms.forEach((platform) => {
@@ -382,53 +356,45 @@ function animate() {
     obj.draw();
   });
   enemy.forEach((enemy) => {
-    if(enemy.position.x  + 600 < goku.position.x )
-    {
+    if (enemy.position.x + 600 < goku.position.x) {
       enemy.visible = true;
     }
     enemy.update();
   });
-  if(is_kamehameha_available)
-  {
-    // c.rect(fire_x , fire_y, fire_w, fire_h);
+  if (is_kamehameha_available) {
     enemy.forEach((enemy) => {
-      if(enemy.position.x < fire_x + fire_w && fire_y  + fire_h >= enemy.position.y  && Math.abs(enemy.position.y - fire_y) < 150 && kamehameha_time > 200)
-      {
+      if (enemy.position.x < fire_x + fire_w && fire_y + fire_h >= enemy.position.y && Math.abs(enemy.position.y - fire_y) < 150 && kamehameha_time > 100) {
         enemy.visible = false;
       }
     });
   }
   goku.update();
-  // platforms.forEach((platform) => {
-  //     platform.update();
-  // });
-  // obstacles.forEach((obstacle) => {
-  //     obstacle.update();
-  // });
-  // winners.forEach((win) => {
-  //     win.update();
-  // });
-  // message.update();
+  c.drawImage(healthbar, 100, 0, 600, 100);
+  c.fillStyle = "#22aef1";
+  c.fillRect(healthbar_pos_x, 38, healthbar_width, 27);
+  if (show_hidden) {
+    platforms.forEach((platform) => {
+      platform.update();
+    });
+    obstacles.forEach((obstacle) => {
+      obstacle.update();
+    });
+    winners.forEach((win) => {
+      win.update();
+    });
+    message.update();
+  }
   if (notover) {
-    c.fillStyle = "brown";
-    // c.fillRect(0, 0, 200, 100);
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    c.fillStyle = "black";
-    c.font = "250px Arial";
-    c.fillText("You Lose", 1000, 600);
-    c.fillStyle = "white";
-    c.font = "80px Arial";
-    c.fillText("Click 'r' to play again", 1000, 800);
+    c.drawImage(losing, 0, 0, canvas.width, canvas.height);
   }
   if (winn) {
-    c.fillStyle = "red";
-    // c.fillRect(500, 300, 2000, 1000);
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    c.fillStyle = "black";
-    c.font = "150px Arial";
-    c.fillText("YOU, WON THE GAME!", 900, 600);
-    c.font = "80px Arial";
-    c.fillText("Click 'r' to play again", 1000, 800);
+    current_stage = 'stage2';
+    winncnt++;
+    load();
+    winn = false;
+  }
+  if (winncnt === 2) {
+    c.drawImage(winning, 0, 0, canvas.width, canvas.height);
   }
   if (keys.right.pressed && goku.position.x < 400) {
     goku.velocity.x = 5;
@@ -520,7 +486,7 @@ function animate() {
     if (
       goku.position.x >= platform.position.x + platform.width &&
       goku.position.x + goku.velocity.x <=
-        platform.position.x + platform.width &&
+      platform.position.x + platform.width &&
       goku.position.y + goku.height > platform.position.y &&
       goku.position.y < platform.position.y + platform.height
     ) {
@@ -528,31 +494,63 @@ function animate() {
     }
   });
   enemy.forEach((enemy) => {
-    if(enemy.visible)
-    {
-    if (
-      goku.position.x <= enemy.position.x  + enemy.velocity.x &&
-      goku.position.x + goku.width + goku.velocity.x >= enemy.position.x  + enemy.velocity.x + 100 &&
-      goku.position.y + goku.height > enemy.position.y &&
-      goku.position.y < enemy.position.y + enemy.height 
-    ) {
-      notover = true;
+    if (enemy.visible) {
+      if (
+        goku.position.x <= enemy.position.x + enemy.velocity.x &&
+        goku.position.x + goku.width + goku.velocity.x >= enemy.position.x + enemy.velocity.x + 100 &&
+        goku.position.y + goku.height > enemy.position.y &&
+        goku.position.y < enemy.position.y + enemy.height
+      ) {
+        if (healthbar_time === 0 || (healthbar_time > 10 && healthbar_time < 12) || healthbar_time > 20) {
+          if (healthbar_state === 1) {
+            healthbar_pos_x = 490;
+            healthbar_width = 120;
+            healthbar_state++;
+          }
+          else if (healthbar_state === 2) {
+            healthbar_pos_x = 300;
+            healthbar_width = 310;
+            healthbar_state++;
+          }
+          else if (healthbar_state === 3) {
+            healthbar_pos_x = 220;
+            healthbar_width = 390;
+            notover = true;
+          }
+        }
+        healthbar_time++;
+      }
+      if (
+        goku.position.x >= enemy.position.x + enemy.velocity.x &&
+        goku.position.x + goku.velocity.x <= enemy.position.x + enemy.velocity.x + 50 &&
+        goku.position.y + goku.height > enemy.position.y &&
+        goku.position.y < enemy.position.y + enemy.height
+      ) {
+        if (healthbar_time === 0 || (healthbar_time > 10 && healthbar_time < 12) || healthbar_time > 20) {
+          if (healthbar_state === 1) {
+            healthbar_pos_x = 490;
+            healthbar_width = 120;
+            healthbar_state++;
+          }
+          else if (healthbar_state === 2) {
+            healthbar_pos_x = 300;
+            healthbar_width = 310;
+            healthbar_state++;
+          }
+          else if (healthbar_state === 3) {
+            healthbar_pos_x = 220;
+            healthbar_width = 390;
+            notover = true;
+          }
+        }
+      }
     }
-    if (
-      goku.position.x >= enemy.position.x  + enemy.velocity.x &&
-      goku.position.x + goku.velocity.x <= enemy.position.x  + enemy.velocity.x + 50 &&
-      goku.position.y + goku.height > enemy.position.y &&
-      goku.position.y < enemy.position.y + enemy.height 
-    ) {
-      notover = true;
-    }
-  }
   });
   obstacles.forEach((obstacle) => {
     if (
       goku.position.y + goku.height <= obstacle.position.y &&
       goku.position.y + goku.height + goku.velocity.y >=
-        obstacle.position.y - 10 &&
+      obstacle.position.y - 10 &&
       goku.position.x + goku.width >= obstacle.position.x &&
       goku.position.x <= obstacle.position.x + obstacle.width
     ) {
@@ -571,37 +569,81 @@ function animate() {
       winn = true;
     }
   });
-  // if (goku.position.y + goku.height <= winners[0].position.y &&
-  //     goku.position.y + goku.height + goku.velocity.y >= winners[0].position.y - 10 &&
-  //     goku.position.x + goku.width >= winners[0].position.x && goku.position.x <= winners[0].position.x + winners[0].width)
-  //     winn = true;
   if (
     goku.position.y + goku.height <= message.position.y &&
     goku.position.y + goku.height + goku.velocity.y >=
-      message.position.y - 10 &&
+    message.position.y - 10 &&
     goku.position.x + goku.width >= message.position.x &&
     goku.position.x <= message.position.x + message.width
   ) {
     c.fillStyle = "#BEE4F4";
-    // c.drawImage(nimbus, message.position.x, 0, 0, 100);
     c.fillStyle = "black";
     c.font = "30px Arial";
-    c.fillText("Play special move by pressing ⬇️", message.position.x, 50);
-    // c.font = "80px Arial";
-    // c.fillText("Click 'r' to play again", 1000, 800);
+    c.fillText("Play special move by holding ⬇️", message.position.x + 1000, 50);
     goku.velocity.y = 0;
-    pauseAudio(goku_screaming);
   }
   c.stroke();
 }
-animate();
+async function load() {
+
+  let stage = current_stage;
+  const enemyURL = `${window.location.href}${stage}/enemy.json`;
+  const platformURL = `${window.location.href}${stage}/platform.json`;
+  const obstacleURL = `${window.location.href}${stage}/obstacle.json`;
+  const winnerURL = `${window.location.href}${stage}/winner.json`;
+  let image = new Image();
+  image.src = `${stage}/temp.png`;
+  if (stage === 'stage1')
+    obj = [new Obj({ x: 0, y: 0, image, width: 22800, height: canvas.height })];
+  else if (stage === 'stage2')
+    obj = [new Obj({ x: 0, y: 0, image, width: 22800, height: 1500 })];
+  await fetch(enemyURL).then(val => {
+    return val.json()
+  }).then(val => {
+    enemy = [];
+    val.forEach(x => {
+      enemy.push(new Enemy(x.x, x.y, x.end));
+    })
+  })
+
+  await fetch(platformURL).then(val => {
+    return val.json()
+  }).then(val => {
+    platforms = [];
+    val.forEach(x => {
+      platforms.push(new Platform({ x: x.x, y: x.y, w: x.w, h: x.h }));
+    })
+  })
+  await fetch(winnerURL).then(val => {
+    return val.json()
+  }).then(val => {
+    winners = [];
+    val.forEach(x => {
+      winners.push(new Platform({ x: x.x, y: x.y, w: x.w, h: x.h }));
+    })
+  })
+  await fetch(obstacleURL).then(val => {
+    return val.json()
+  }).then(val => {
+    obstacles = [];
+    val.forEach(x => {
+      obstacles.push(new Obstacle({ x: x.x, y: x.y, w: x.w, h: x.h }));
+    })
+  })
+}
+
+load().then(() => {
+  animate();
+});
 document.addEventListener("keydown", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
     case 32: //space
-     action = "kamehameha";
-     is_kamehameha_available = true;
-     break;
+      action = "kamehameha";
+      pauseAudio(goku_screaming);
+      playAudio(goku_kamehameha);
+      is_kamehameha_available = true;
+      break;
     case 37:
       keys.left.pressed = true;
       action = "moveleft";
@@ -616,6 +658,7 @@ document.addEventListener("keydown", (event) => {
     case 40: // down
       keys.down.pressed = true;
       playAudio(goku_screaming);
+      pauseAudio(goku_kamehameha);
       action = "headmove";
       break;
   }
@@ -626,7 +669,7 @@ function jump() {
     return;
   }
   goku.velocity.y = -22;
-  playAudio(jumpaudio);
+  // playAudio(jumpaudio);
   jumping = true;
 }
 window.addEventListener("keydown", function (event) {
@@ -638,13 +681,15 @@ document.addEventListener("keyup", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
     case 32: //space
-     action = "standing";
-     is_kamehameha_available = false;
-     kamehameha_time = 0;
-     goku.kame = 100;
-     k_width = 150;
-     goku.k = 0;
-     break;
+      action = "standing";
+      is_kamehameha_available = false;
+      pauseAudio(goku_kamehameha);
+      //  pauseAudio(goku_screaming);
+      kamehameha_time = 0;
+      goku.kame = 100;
+      k_width = 150;
+      goku.k = 0;
+      break;
     case 37: //left
       keys.left.pressed = false;
       action = "standing";
