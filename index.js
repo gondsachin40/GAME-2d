@@ -14,7 +14,11 @@ let show_hidden = false;
 var c = canvas.getContext("2d");
 const gravity = 0.5;
 let notover = false;
+<<<<<<< Updated upstream
 let scroll_speed = 15;
+=======
+let scroll_speed = 10;
+>>>>>>> Stashed changes
 let winn = false;
 var gokupos = new Image();
 gokupos.src = "gokupos.png";
@@ -312,7 +316,8 @@ let image
 
 const jumpaudio = new Audio("Punnet.mp3");
 const goku_screaming = new Audio("goku_screaming.mp3");
-
+const goku_kamehameha = new Audio("kamehameha.mp3");
+// const back = new Audio("back.mp3");
 let obj
 
 const message = new Platform({ x: 16640, y: 450, w: 300, h: 20 });
@@ -336,6 +341,7 @@ function pauseAudio(x) {
 }
 function animate() {
   requestAnimationFrame(animate);
+  // playAudio(back);
   c.clearRect(0, 0, canvas.width, canvas.height);
   c.beginPath();
   platforms.forEach((platform) => {
@@ -580,13 +586,12 @@ function animate() {
     c.font = "30px Arial";
     c.fillText("Play special move by holding ⬇️", message.position.x + 1000, 50);
     goku.velocity.y = 0;
-    pauseAudio(goku_screaming);
   }
   c.stroke();
 }
 async function load() {
-
-  let stage = current_stage;
+  
+  let stage = 'stage1';
   const enemyURL = `${window.location.href}${stage}/enemy.json`;
   const platformURL = `${window.location.href}${stage}/platform.json`;
   const obstacleURL = `${window.location.href}${stage}/obstacle.json`;
@@ -640,9 +645,11 @@ document.addEventListener("keydown", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
     case 32: //space
-      action = "kamehameha";
-      is_kamehameha_available = true;
-      break;
+     action = "kamehameha";
+     pauseAudio(goku_screaming);
+     playAudio(goku_kamehameha);
+     is_kamehameha_available = true;
+     break;
     case 37:
       keys.left.pressed = true;
       action = "moveleft";
@@ -657,6 +664,7 @@ document.addEventListener("keydown", (event) => {
     case 40: // down
       keys.down.pressed = true;
       playAudio(goku_screaming);
+      pauseAudio(goku_kamehameha);
       action = "headmove";
       break;
   }
@@ -667,7 +675,7 @@ function jump() {
     return;
   }
   goku.velocity.y = -22;
-  playAudio(jumpaudio);
+  // playAudio(jumpaudio);
   jumping = true;
 }
 window.addEventListener("keydown", function (event) {
@@ -679,13 +687,15 @@ document.addEventListener("keyup", (event) => {
   let keycode = event.keyCode;
   switch (keycode) {
     case 32: //space
-      action = "standing";
-      is_kamehameha_available = false;
-      kamehameha_time = 0;
-      goku.kame = 100;
-      k_width = 150;
-      goku.k = 0;
-      break;
+     action = "standing";
+     is_kamehameha_available = false;
+     pauseAudio(goku_kamehameha);
+    //  pauseAudio(goku_screaming);
+     kamehameha_time = 0;
+     goku.kame = 100;
+     k_width = 150;
+     goku.k = 0;
+     break;
     case 37: //left
       keys.left.pressed = false;
       action = "standing";
