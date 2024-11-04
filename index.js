@@ -390,11 +390,14 @@ function animate() {
   if (winn) {
     current_stage = 'stage2';
     winncnt++;
-    load();
-    winn = false;
-  }
-  if (winncnt === 2) {
-    c.drawImage(winning, 0, 0, canvas.width, canvas.height);
+    if (winncnt >= 2) {
+      c.drawImage(winning, 0, 0, canvas.width, canvas.height);
+      winn = true;
+
+    }else{
+      load();
+      winn = false;
+    }
   }
   if (keys.right.pressed && goku.position.x < 400) {
     goku.velocity.x = 5;
