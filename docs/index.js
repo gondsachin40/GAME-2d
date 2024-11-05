@@ -19,7 +19,7 @@ let winn = false;
 var gokupos = new Image();
 gokupos.src = "gokupos.png";
 var kamehameha = new Image();
-kamehameha.src = "kama.png";
+kamehameha.src = "kamehameha.png";
 var saiba = new Image();
 saiba.src = "saiba.png";
 var losing = new Image();
@@ -390,11 +390,14 @@ function animate() {
   if (winn) {
     current_stage = 'stage2';
     winncnt++;
-    load();
-    winn = false;
-  }
-  if (winncnt === 2) {
-    c.drawImage(winning, 0, 0, canvas.width, canvas.height);
+    if (winncnt >= 2) {
+      c.drawImage(winning, 0, 0, canvas.width, canvas.height);
+      winn = true;
+
+    }else{
+      load();
+      winn = false;
+    }
   }
   if (keys.right.pressed && goku.position.x < 400) {
     goku.velocity.x = 5;
