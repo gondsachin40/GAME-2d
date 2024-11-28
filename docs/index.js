@@ -569,6 +569,7 @@ function animate() {
       goku.position.x <= win.position.x + win.width
     ) {
       goku.velocity.y = 0;
+      current_stage = 'stage2';
       winn = true;
     }
   });
