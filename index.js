@@ -643,6 +643,7 @@ document.addEventListener("keydown", (event) => {
   switch (keycode) {
     case 32: //space
       action = "kamehameha";
+      keys.down.pressed = false;
       pauseAudio(goku_screaming);
       playAudio(goku_kamehameha);
       is_kamehameha_available = true;
@@ -659,7 +660,7 @@ document.addEventListener("keydown", (event) => {
       action = "moveright";
       break;
     case 40: // down
-      keys.down.pressed = true;
+      keys.down.pressed = true; 
       playAudio(goku_screaming);
       pauseAudio(goku_kamehameha);
       action = "headmove";
